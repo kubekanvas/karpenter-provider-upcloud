@@ -6,11 +6,14 @@ KARPENTER_NAMESPACE ?= karpenter
 CLUSTER_NAME ?=
 CLUSTER_ZONE ?=
 
-# Karpenter core owns the NodePool and NodeClaim CRDs. They are vendored into pkg/apis/crds so the
-# controller can install exactly the versions it was built against, rather than whatever happens to
-# be in the cluster.
-KARPENTER_CORE_VERSION := $(shell go list -m -f '{{.Version}}' sigs.k8s.io/karpenter)
-KARPENTER_CORE_DIR := $(shell go list -m -f '{{.Dir}}' sigs.k8s.io/karpenter)
+# Karpenter core owns the NodePool, NodeClaim and NodeOverlay CRDs. They are vendored into
+# pkg/apis/crds so the controller installs exactly the versions it was built against, rather than
+# whatever happens to be in the cluster.
+#
+# The module's on-disk location is resolved inside the recipe, not here: `go list -m -f '{{.Dir}}'`
+# returns an empty string until the module has been extracted into the module cache, so evaluating
+# it at parse time silently yields `cp /pkg/apis/...` on a cold cache such as a fresh CI runner.
+KARPENTER_CORE_CRDS := karpenter.sh_nodepools karpenter.sh_nodeclaims karpenter.sh_nodeoverlays
 
 .PHONY: help
 help: ## Show this help
@@ -52,11 +55,19 @@ codegen: ## Regenerate deepcopy functions and the UpCloudNodeClass CRD
 
 .PHONY: vendor-crds
 vendor-crds: ## Copy the Karpenter core CRDs matching the pinned karpenter version
-	@echo "vendoring karpenter core CRDs from $(KARPENTER_CORE_VERSION)"
-	cp $(KARPENTER_CORE_DIR)/pkg/apis/crds/karpenter.sh_nodepools.yaml pkg/apis/crds/
-	cp $(KARPENTER_CORE_DIR)/pkg/apis/crds/karpenter.sh_nodeclaims.yaml pkg/apis/crds/
-	cp $(KARPENTER_CORE_DIR)/pkg/apis/crds/karpenter.sh_nodeoverlays.yaml pkg/apis/crds/
-	chmod +w pkg/apis/crds/*.yaml
+	@set -euo pipefail; \
+	go mod download sigs.k8s.io/karpenter; \
+	version=$$(go list -m -f '{{.Version}}' sigs.k8s.io/karpenter); \
+	dir=$$(go list -m -f '{{.Dir}}' sigs.k8s.io/karpenter); \
+	if [ -z "$$dir" ]; then \
+		echo "could not resolve sigs.k8s.io/karpenter in the module cache" >&2; \
+		exit 1; \
+	fi; \
+	echo "vendoring karpenter core CRDs from $$version"; \
+	for crd in $(KARPENTER_CORE_CRDS); do \
+		cp "$$dir/pkg/apis/crds/$$crd.yaml" pkg/apis/crds/; \
+	done; \
+	chmod +w pkg/apis/crds/*.yaml; \
 	cp pkg/apis/crds/*.yaml charts/karpenter-crd/templates/
 
 .PHONY: verify
