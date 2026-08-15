@@ -65,7 +65,15 @@ verify: generate tidy ## Regenerate everything and fail if anything changed
 
 .PHONY: image
 image: ## Build and publish the controller image with ko
-	KO_DOCKER_REPO=$(KO_DOCKER_REPO) ko build --bare ./cmd/controller
+	# --bare uses KO_DOCKER_REPO verbatim instead of appending the Go import path, keeping the
+	# result aligned with image.repository in the chart's values.yaml.
+	KO_DOCKER_REPO=$(KO_DOCKER_REPO) go tool -modfile=go.tools.mod ko build --bare ./cmd/controller
+
+.PHONY: package
+package: ## Package both charts into dist/ at VERSION (defaults to the chart's own version)
+	mkdir -p dist
+	helm package charts/karpenter-crd --destination dist $(if $(VERSION),--version $(VERSION) --app-version $(VERSION))
+	helm package charts/karpenter --destination dist $(if $(VERSION),--version $(VERSION) --app-version $(VERSION))
 
 .PHONY: install
 install: ## Install the chart into the current cluster context

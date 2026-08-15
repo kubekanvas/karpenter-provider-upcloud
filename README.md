@@ -155,12 +155,38 @@ make lint         # golangci-lint
 make generate     # regenerate deepcopy funcs and CRDs
 make verify       # regenerate and fail if anything changed
 make image        # build and publish with ko
+make package      # package both charts into dist/
 ```
 
 `make generate` regenerates `zz_generated.deepcopy.go` and the `UpCloudNodeClass` CRD with
 `controller-gen`, and re-vendors the Karpenter core CRDs from the pinned `sigs.k8s.io/karpenter`
 version. The CRDs are vendored rather than fetched at runtime so that they can never drift from the
 binary that reads them.
+
+`controller-gen`, `golangci-lint` and `ko` are pinned in `go.tools.mod` and run via `go tool`, so
+there is nothing to install and CI runs the same versions you do locally.
+
+## Releasing
+
+Push a semver tag and the release workflow does the rest:
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+It re-runs the build, tests and `make verify` against the tagged commit — a tag can point at any
+commit, including one that never went through a pull request — then publishes:
+
+- the controller image, multi-arch (`linux/amd64`, `linux/arm64`), to
+  `ghcr.io/kubekanvas/karpenter-upcloud/controller`, tagged with the version and `latest`;
+- both Helm charts to `oci://ghcr.io/kubekanvas/charts`, stamped with the tag as `version` and
+  `appVersion`;
+- a GitHub Release with the chart tarballs and generated notes.
+
+The image and the `karpenter-crd` chart are always cut from the same commit. The CRDs are compiled
+into the controller binary *and* shipped in that chart, so a chart carrying a different schema than
+the binary expects is a broken install. The `generated` CI job guards the same invariant on every
+pull request by regenerating and failing on any diff.
 
 ### Layout
 
