@@ -49,7 +49,18 @@ jobs:
           go test ./...
           make verify
 
-      - name: Log in to ghcr.io
+      # Two logins are required, and they are not interchangeable. Helm keeps its own registry
+      # credential store, while ko resolves credentials through go-containerregistry's keychain,
+      # which reads ~/.docker/config.json — the file docker/login-action writes. Authenticating only
+      # one of them leaves the other pushing anonymously, which ghcr.io rejects with a bare DENIED.
+      - name: Log in to ghcr.io for ko
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to ghcr.io for helm
         run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Build and push controller image
