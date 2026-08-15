@@ -72,13 +72,18 @@ jobs:
           KO_CONFIG_PATH: .ko.yaml
         run: |
           set -euo pipefail
-          digest=$(go tool -modfile=go.tools.mod ko build ./cmd/controller \
+          # A multi-arch build emits one ref per platform plus the index, so the refs go to a file
+          # rather than being captured from stdout: GITHUB_OUTPUT rejects a multi-line value written
+          # as a plain key=value, and the step fails *after* the image has already been pushed.
+          go tool -modfile=go.tools.mod ko build ./cmd/controller \
             --bare \
             --platform=linux/amd64,linux/arm64 \
             --tags="${{ steps.version.outputs.version }},latest" \
-            --image-refs=/dev/stdout)
-          echo "ref=${digest}" >> "$GITHUB_OUTPUT"
-          echo "published ${digest}"
+            --image-refs=image-refs.txt
+          echo "published refs:"
+          cat image-refs.txt
+          # The tag is what the chart references and is guaranteed to be a single line.
+          echo "ref=ghcr.io/${{ github.repository }}/controller:${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
 
       # The controller image and the CRD chart are cut from one commit on purpose: the CRDs are
       # compiled into the binary, so a chart that ships a different schema than the binary expects

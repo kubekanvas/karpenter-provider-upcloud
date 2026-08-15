@@ -1,4 +1,5 @@
+*.test
 /bin/
 /dist/
 coverage.out
-*.test
+image-refs.txt
