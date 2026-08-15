@@ -1,0 +1,9 @@
+apiVersion: v2
+name: karpenter-crd
+description: Custom Resource Definitions for Karpenter on UpCloud.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/kubekanvas/karpenter-upcloud
+sources:
+  - https://github.com/kubekanvas/karpenter-upcloud

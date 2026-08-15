@@ -1,0 +1,120 @@
+replicas: 1
+
+image:
+  repository: ghcr.io/kubekanvas/karpenter-upcloud/controller
+  tag: ""
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+settings:
+  # clusterName labels every server this controller launches and is the filter used to find them
+  # again. Two clusters sharing an UpCloud account must not share a name.
+  clusterName: ""
+  # clusterZone is the UpCloud zone used by NodeClasses that do not set spec.zones, e.g. fi-hel1.
+  clusterZone: ""
+  # Fraction of a plan's advertised memory assumed lost to virtualisation, used until a real node of
+  # that plan reports its capacity.
+  vmMemoryOverheadPercent: 0.075
+  # Skip validating NodeClass references against the UpCloud API.
+  disableDryRun: false
+  logLevel: info
+  # Karpenter core settings.
+  batchMaxDuration: 10s
+  batchIdleDuration: 1s
+  featureGates:
+    nodeRepair: false
+    reservedCapacity: true
+    spotToSpotConsolidation: false
+
+# UpCloud credentials. Prefer an existing Secret so the token never lands in values.yaml or in the
+# Helm release history.
+#
+# The Secret must contain either UPCLOUD_TOKEN, or UPCLOUD_USERNAME and UPCLOUD_PASSWORD.
+credentials:
+  existingSecret: ""
+  # Only used when existingSecret is empty. An API token is preferred over account credentials
+  # because it can be scoped to just the permissions this controller needs.
+  token: ""
+  username: ""
+  password: ""
+
+# Karpenter must not schedule onto nodes it manages, or it can evict itself and lose the ability to
+# bring the cluster back. Keep it pinned to the control plane or to a static node pool.
+nodeSelector:
+  kubernetes.io/os: linux
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: karpenter.sh/nodepool
+              operator: DoesNotExist
+tolerations:
+  - key: CriticalAddonsOnly
+    operator: Exists
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: karpenter
+
+priorityClassName: system-cluster-critical
+
+podAnnotations: {}
+podLabels: {}
+
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+podSecurityContext:
+  fsGroup: 65534
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+  seccompProfile:
+    type: RuntimeDefault
+
+controller:
+  env: []
+  healthProbe:
+    port: 8081
+  metrics:
+    port: 8080
+
+serviceMonitor:
+  enabled: false
+  additionalLabels: {}
+  endpointConfig: {}
+
+logConfig:
+  enabled: false
+
+# Extra objects rendered as-is, e.g. a default UpCloudNodeClass and NodePool.
+extraObjects: []

@@ -1,0 +1,66 @@
+apiVersion: karpenter.k8s.upcloud/v1alpha1
+kind: UpCloudNodeClass
+metadata:
+  name: default
+spec:
+  # Zones servers may be launched into. Omit to use the controller's --cluster-zone.
+  # UpCloud has no region above the zone, so listing several zones spreads across datacenters.
+  zones:
+    - fi-hel1
+    - fi-hel2
+
+  storage:
+    # Public template UUID. List them with: upctl storage list --public --template
+    # This one is Ubuntu Server 24.04 LTS (Noble Numbat).
+    template: "01000000-0000-4000-8000-000030240200"
+    size: 80
+    tier: maxiops
+
+  loginUser:
+    username: ubuntu
+    sshKeys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExampleKeyReplaceMe you@example.com
+
+  network:
+    interfaces:
+      # A public interface so the node can pull images. Drop it and use an SDN network with a NAT
+      # gateway if nodes must not have public addresses.
+      - type: public
+        ipFamilies: [IPv4]
+      # At least one utility or private interface is required: the UpCloud
+      # cloud-controller-manager will not initialise a node without a private address.
+      - type: utility
+
+  labels:
+    team: platform
+
+  kubelet:
+    maxPods: 110
+    systemReserved:
+      cpu: 100m
+      memory: 100Mi
+    kubeReserved:
+      cpu: 200m
+      memory: 100Mi
+    evictionHard:
+      memory.available: 5%
+
+  # cloud-init that joins the node to the cluster. This example uses k3s; swap in kubeadm, or a
+  # pre-baked template with a systemd unit, as appropriate.
+  #
+  # The node MUST end up with spec.providerID set to upcloud:////<server-uuid>, which is what the
+  # UpCloud cloud-controller-manager writes. Install the CCM and let it set it, rather than
+  # hardcoding it here.
+  userData: |
+    #cloud-config
+    write_files:
+      - path: /etc/rancher/k3s/config.yaml
+        content: |
+          server: https://k3s.example.internal:6443
+          token: REPLACE_ME
+          kubelet-arg:
+            - "cloud-provider=external"
+          node-label:
+            - "karpenter.sh/registered=true"
+    runcmd:
+      - curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="agent" sh -
