@@ -37,13 +37,13 @@ import (
 	"sigs.k8s.io/karpenter/pkg/events"
 	"sigs.k8s.io/karpenter/pkg/utils/resources"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/apis"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/apis/v1alpha1"
-	cloudproviderevents "github.com/kubekanvas/karpenter-upcloud/pkg/cloudprovider/events"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/operator/options"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/providers/instance"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/providers/instancetype"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/utils"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis/v1alpha1"
+	cloudproviderevents "github.com/kubekanvas/karpenter-provider-upcloud/pkg/cloudprovider/events"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/operator/options"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/providers/instance"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/providers/instancetype"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/utils"
 )
 
 var _ cloudprovider.CloudProvider = (*CloudProvider)(nil)

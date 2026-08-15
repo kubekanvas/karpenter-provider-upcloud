@@ -8,6 +8,6 @@ keywords:
   - karpenter
   - autoscaling
   - upcloud
-home: https://github.com/kubekanvas/karpenter-upcloud
+home: https://github.com/kubekanvas/karpenter-provider-upcloud
 sources:
-  - https://github.com/kubekanvas/karpenter-upcloud
+  - https://github.com/kubekanvas/karpenter-provider-upcloud

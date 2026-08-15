@@ -22,15 +22,15 @@ import (
 	"github.com/patrickmn/go-cache"
 	"sigs.k8s.io/karpenter/pkg/operator"
 
-	upcloudcache "github.com/kubekanvas/karpenter-upcloud/pkg/cache"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/operator/options"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/providers/instance"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/providers/instancetype"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/providers/pricing"
-	sdk "github.com/kubekanvas/karpenter-upcloud/pkg/upcloud"
+	upcloudcache "github.com/kubekanvas/karpenter-provider-upcloud/pkg/cache"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/operator/options"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/providers/instance"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/providers/instancetype"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/providers/pricing"
+	sdk "github.com/kubekanvas/karpenter-provider-upcloud/pkg/upcloud"
 )
 
-const userAgent = "karpenter-upcloud"
+const userAgent = "karpenter-provider-upcloud"
 
 // Operator holds everything the UpCloud CloudProvider and its controllers are built from.
 type Operator struct {

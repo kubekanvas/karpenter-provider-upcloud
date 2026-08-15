@@ -138,12 +138,12 @@ formatters:
         - default
         - blank
         - dot
-        - prefix(github.com/kubekanvas/karpenter-upcloud)
+        - prefix(github.com/kubekanvas/karpenter-provider-upcloud)
     gofmt:
       simplify: true
     goimports:
       local-prefixes:
-        - github.com/kubekanvas/karpenter-upcloud
+        - github.com/kubekanvas/karpenter-provider-upcloud
   exclusions:
     generated: lax
     paths:

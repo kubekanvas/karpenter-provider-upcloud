@@ -26,7 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/karpenter/pkg/operator/injection"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/providers/pricing"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/providers/pricing"
 )
 
 // refreshPeriod controls how quickly a price change is picked up. UpCloud prices are stable, but

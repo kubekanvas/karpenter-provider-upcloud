@@ -25,7 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/karpenter/pkg/utils/pretty"
 
-	sdk "github.com/kubekanvas/karpenter-upcloud/pkg/upcloud"
+	sdk "github.com/kubekanvas/karpenter-provider-upcloud/pkg/upcloud"
 )
 
 const (

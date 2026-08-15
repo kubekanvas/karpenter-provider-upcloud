@@ -27,7 +27,7 @@ import (
 	"github.com/samber/lo"
 	karpv1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/apis/v1alpha1"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis/v1alpha1"
 )
 
 // ProviderIDPrefix is the prefix the UpCloud cloud-controller-manager writes into

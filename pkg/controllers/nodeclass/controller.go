@@ -35,9 +35,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/karpenter/pkg/operator/injection"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/apis/v1alpha1"
-	sdk "github.com/kubekanvas/karpenter-upcloud/pkg/upcloud"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/utils"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis/v1alpha1"
+	sdk "github.com/kubekanvas/karpenter-provider-upcloud/pkg/upcloud"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/utils"
 )
 
 // resyncPeriod bounds how stale a NodeClass's resolved zones and template can be. UpCloud adds

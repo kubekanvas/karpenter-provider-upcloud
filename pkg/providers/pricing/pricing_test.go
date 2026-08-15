@@ -21,8 +21,8 @@ import (
 
 	"github.com/UpCloudLtd/upcloud-go-api/v8/upcloud"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/providers/pricing"
-	sdk "github.com/kubekanvas/karpenter-upcloud/pkg/upcloud"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/providers/pricing"
+	sdk "github.com/kubekanvas/karpenter-provider-upcloud/pkg/upcloud"
 )
 
 // fakeAPI implements only the calls the pricing provider makes. Embedding the interface satisfies

@@ -24,9 +24,9 @@ import (
 	"sigs.k8s.io/karpenter/pkg/controllers/state"
 	coreoperator "sigs.k8s.io/karpenter/pkg/operator"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/cloudprovider"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/controllers"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/operator"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/cloudprovider"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/controllers"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/operator"
 )
 
 func main() {

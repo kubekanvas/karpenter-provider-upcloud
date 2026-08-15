@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/karpenter/pkg/scheduling"
 	"sigs.k8s.io/karpenter/pkg/utils/resources"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/apis/v1alpha1"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/operator/options"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis/v1alpha1"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/operator/options"
 )
 
 const (

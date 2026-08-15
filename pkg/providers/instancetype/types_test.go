@@ -22,9 +22,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	karpv1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/apis/v1alpha1"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/operator/options"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/providers/instancetype"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis/v1alpha1"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/operator/options"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/providers/instancetype"
 )
 
 func TestPlanFamily(t *testing.T) {

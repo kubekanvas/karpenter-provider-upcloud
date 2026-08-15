@@ -1,4 +1,4 @@
-# karpenter-upcloud
+# karpenter-provider-upcloud
 
 A [Karpenter](https://karpenter.sh) cloud provider for [UpCloud](https://upcloud.com). It implements
 `sigs.k8s.io/karpenter`'s `CloudProvider` interface against UpCloud's cloud server API, so Karpenter
@@ -178,7 +178,7 @@ It re-runs the build, tests and `make verify` against the tagged commit — a ta
 commit, including one that never went through a pull request — then publishes:
 
 - the controller image, multi-arch (`linux/amd64`, `linux/arm64`), to
-  `ghcr.io/kubekanvas/karpenter-upcloud/controller`, tagged with the version and `latest`;
+  `ghcr.io/kubekanvas/karpenter-provider-upcloud/controller`, tagged with the version and `latest`;
 - both Helm charts to `oci://ghcr.io/kubekanvas/charts`, stamped with the tag as `version` and
   `appVersion`;
 - a GitHub Release with the chart tarballs and generated notes.

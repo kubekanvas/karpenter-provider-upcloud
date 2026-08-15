@@ -21,8 +21,8 @@ import (
 	karpv1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 	"sigs.k8s.io/karpenter/pkg/cloudprovider"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/apis/v1alpha1"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/utils"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis/v1alpha1"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/utils"
 )
 
 const (

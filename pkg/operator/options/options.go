@@ -24,7 +24,7 @@ import (
 	coreoptions "sigs.k8s.io/karpenter/pkg/operator/options"
 	"sigs.k8s.io/karpenter/pkg/utils/env"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/utils"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/utils"
 )
 
 func init() {

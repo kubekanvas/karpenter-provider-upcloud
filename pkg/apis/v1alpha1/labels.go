@@ -19,7 +19,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	karpv1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/apis"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis"
 )
 
 func init() {

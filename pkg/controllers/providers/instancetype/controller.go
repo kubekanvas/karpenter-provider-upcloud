@@ -26,7 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/karpenter/pkg/operator/injection"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/providers/instancetype"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/providers/instancetype"
 )
 
 // refreshPeriod is deliberately long: UpCloud introduces and retires plans on the order of months,

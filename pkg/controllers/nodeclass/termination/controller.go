@@ -33,7 +33,7 @@ import (
 	"sigs.k8s.io/karpenter/pkg/operator/injection"
 	nodeclaimutils "sigs.k8s.io/karpenter/pkg/utils/nodeclaim"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/apis/v1alpha1"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis/v1alpha1"
 )
 
 // requeueWhileInUse is how often a NodeClass with live NodeClaims is re-checked while it waits to

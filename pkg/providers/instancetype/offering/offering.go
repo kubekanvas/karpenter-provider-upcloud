@@ -26,8 +26,8 @@ import (
 	"sigs.k8s.io/karpenter/pkg/cloudprovider"
 	"sigs.k8s.io/karpenter/pkg/scheduling"
 
-	upcloudcache "github.com/kubekanvas/karpenter-upcloud/pkg/cache"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/providers/pricing"
+	upcloudcache "github.com/kubekanvas/karpenter-provider-upcloud/pkg/cache"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/providers/pricing"
 )
 
 type Provider interface {

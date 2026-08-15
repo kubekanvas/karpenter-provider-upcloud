@@ -1,4 +1,4 @@
-module github.com/kubekanvas/karpenter-upcloud
+module github.com/kubekanvas/karpenter-provider-upcloud
 
 go 1.26.5
 

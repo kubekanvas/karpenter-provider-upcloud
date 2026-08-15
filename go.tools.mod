@@ -1,4 +1,4 @@
-module github.com/kubekanvas/karpenter-upcloud/tools
+module github.com/kubekanvas/karpenter-provider-upcloud/tools
 
 go 1.26.5
 
@@ -8,10 +8,16 @@ tool (
 	sigs.k8s.io/controller-tools/cmd/controller-gen
 )
 
+// The tools module shares a directory with the main module, so `go mod tidy` sees the local .go
+// files and resolves the main module from the proxy at a published pseudo-version. That pins a
+// stale copy of our own code into go.tools.sum and breaks outright if the module path changes.
+// Resolving it locally is what sigs.k8s.io/karpenter does for the same reason.
+replace github.com/kubekanvas/karpenter-provider-upcloud => ./
+
 require (
 	github.com/UpCloudLtd/upcloud-go-api/v8 v8.40.0
 	github.com/awslabs/operatorpkg v0.0.0-20260812232916-6d329cee9a40
-	github.com/kubekanvas/karpenter-upcloud v0.0.0-20260815093444-f0db7229b5c9
+	github.com/kubekanvas/karpenter-provider-upcloud v0.0.0-20260815093444-f0db7229b5c9
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.23.2

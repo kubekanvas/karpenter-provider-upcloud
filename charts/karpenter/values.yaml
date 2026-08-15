@@ -1,7 +1,7 @@
 replicas: 1
 
 image:
-  repository: ghcr.io/kubekanvas/karpenter-upcloud/controller
+  repository: ghcr.io/kubekanvas/karpenter-provider-upcloud/controller
   tag: ""
   pullPolicy: IfNotPresent
 imagePullSecrets: []

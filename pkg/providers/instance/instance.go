@@ -33,10 +33,10 @@ import (
 	"sigs.k8s.io/karpenter/pkg/cloudprovider"
 	"sigs.k8s.io/karpenter/pkg/scheduling"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/apis/v1alpha1"
-	upcloudcache "github.com/kubekanvas/karpenter-upcloud/pkg/cache"
-	sdk "github.com/kubekanvas/karpenter-upcloud/pkg/upcloud"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/utils"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis/v1alpha1"
+	upcloudcache "github.com/kubekanvas/karpenter-provider-upcloud/pkg/cache"
+	sdk "github.com/kubekanvas/karpenter-provider-upcloud/pkg/upcloud"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/utils"
 )
 
 const (

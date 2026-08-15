@@ -33,10 +33,10 @@ import (
 	"sigs.k8s.io/karpenter/pkg/cloudprovider"
 	"sigs.k8s.io/karpenter/pkg/operator/injection"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/apis/v1alpha1"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/operator/options"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/providers/instance"
-	"github.com/kubekanvas/karpenter-upcloud/pkg/utils"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis/v1alpha1"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/operator/options"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/providers/instance"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/utils"
 )
 
 type Controller struct {

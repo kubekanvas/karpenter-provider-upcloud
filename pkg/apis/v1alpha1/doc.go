@@ -23,7 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/apis"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis"
 )
 
 func init() {

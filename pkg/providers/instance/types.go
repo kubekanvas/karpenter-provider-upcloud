@@ -17,7 +17,7 @@ package instance
 import (
 	"github.com/UpCloudLtd/upcloud-go-api/v8/upcloud"
 
-	"github.com/kubekanvas/karpenter-upcloud/pkg/utils"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/utils"
 )
 
 // Instance is this provider's view of an UpCloud cloud server.
