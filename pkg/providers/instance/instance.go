@@ -346,10 +346,16 @@ func networking(nodeClass *v1alpha1.UpCloudNodeClass) *request.CreateServerNetwo
 			addresses = append(addresses, request.CreateServerIPAddress{Family: family})
 		}
 		created := request.CreateServerInterface{
-			Index:             i + 1,
-			Type:              iface.Type,
-			IPAddresses:       addresses,
-			SourceIPFiltering: upcloud.FromBool(lo.FromPtr(iface.SourceIPFiltering)),
+			Index:       i + 1,
+			Type:        iface.Type,
+			IPAddresses: addresses,
+		}
+		// Only send source IP filtering when the NodeClass actually asked for it. UpCloud's
+		// Boolean distinguishes unset from false, and sending an explicit false rejects the whole
+		// create with SOURCE_IP_FILTERING_INVALID on a public interface, where the setting cannot
+		// be disabled. Leaving it unset lets UpCloud apply the per-interface-type default.
+		if iface.SourceIPFiltering != nil {
+			created.SourceIPFiltering = upcloud.FromBool(*iface.SourceIPFiltering)
 		}
 		if iface.Type == interfaceTypePrivate {
 			created.Network = lo.FromPtr(iface.Network)
@@ -389,10 +395,24 @@ func (p *DefaultProvider) recordLaunchFailure(ctx context.Context, err error, pl
 func cheapestOffering(instanceTypes []*cloudprovider.InstanceType, nodeClaim *karpv1.NodeClaim) (*cloudprovider.InstanceType, string, error) {
 	reqs := scheduling.NewNodeSelectorRequirementsWithMinValues(nodeClaim.Spec.Requirements...)
 
+	// The scheduler has already decided which instance types satisfy this NodeClaim and recorded
+	// the answer in the instance-type requirement. Trust it rather than re-deriving compatibility
+	// from the whole requirement set.
+	//
+	// Re-deriving it does not work: Requirements.Compatible rejects any non-well-known "In" key
+	// that the instance type does not itself declare, and every NodeClaim carries at least one.
+	// Karpenter stamps <group>/<nodeclass-kind> — here karpenter.k8s.upcloud/upcloudnodeclass —
+	// onto the NodeClaim template without registering it as a well-known label, and any label a
+	// user puts on their NodePool template arrives the same way. Filtering on those rejected every
+	// instance type and surfaced as "insufficient capacity" on a cluster with ample capacity.
+	instanceTypeReq := reqs.Get(corev1.LabelInstanceTypeStable)
+
 	var bestType *cloudprovider.InstanceType
 	var bestOffering *cloudprovider.Offering
 	for _, it := range instanceTypes {
-		if err := it.Requirements.Compatible(reqs, scheduling.AllowUndefinedWellKnownLabels); err != nil {
+		// A NodeClaim created by hand may carry no instance-type requirement, in which case every
+		// type remains a candidate and the offering and resource checks below still apply.
+		if instanceTypeReq.Len() != 0 && !instanceTypeReq.Has(it.Name) {
 			continue
 		}
 		if !resourcesFit(it, nodeClaim) {
