@@ -146,6 +146,14 @@ karpenter.k8s.upcloud/instance-public-traffic-out
 Karpenter core's own options (`LOG_LEVEL`, `BATCH_MAX_DURATION`, `FEATURE_GATES`, …) apply as
 documented upstream.
 
+## Limitations
+
+- No spot, reserved or preemptible capacity — UpCloud does not sell any.
+- No `nodeClassRef` selectors for plans; narrow the catalogue with NodePool requirements instead.
+- GPU plans advertise `nvidia.com/gpu`; the device plugin still has to be installed separately.
+- Drift covers the NodeClass hash and the server's zone. A plan being retired by UpCloud is not
+  reported as drift.
+  
 ## Development
 
 ```bash
@@ -202,13 +210,7 @@ pkg/providers/pricing    the UpCloud price list
 pkg/upcloud              the slice of the UpCloud SDK this provider uses
 ```
 
-## Limitations
 
-- No spot, reserved or preemptible capacity — UpCloud does not sell any.
-- No `nodeClassRef` selectors for plans; narrow the catalogue with NodePool requirements instead.
-- GPU plans advertise `nvidia.com/gpu`; the device plugin still has to be installed separately.
-- Drift covers the NodeClass hash and the server's zone. A plan being retired by UpCloud is not
-  reported as drift.
 
 ## License
 
