@@ -40,9 +40,12 @@ import (
 )
 
 const (
-	// stopTimeout is how long UpCloud is asked to wait for a graceful ACPI shutdown before pulling
-	// the plug. Karpenter has already drained the node by the time Delete is called, so there is
-	// nothing left to lose by being impatient.
+	// stopTimeout bounds how long UpCloud spends stopping the server.
+	//
+	// The stop is a hard one. Karpenter has already cordoned and drained the node by the time
+	// Delete is called, so a graceful ACPI shutdown protects nothing — and measured against a live
+	// cluster it cost about 90 seconds per node, during which the server sits in "maintenance" and
+	// every reconcile logs an error because the API refuses to delete a server in that state.
 	stopTimeout = 30 * time.Second
 
 	// listConcurrency bounds the parallel details lookups performed while listing servers. UpCloud
@@ -212,10 +215,8 @@ func (p *DefaultProvider) Delete(ctx context.Context, uuid string) error {
 	default:
 		log.FromContext(ctx).WithValues("uuid", uuid, "state", instance.State).V(1).Info("stopping server before deletion")
 		if _, err := p.client.StopServer(ctx, &request.StopServerRequest{
-			UUID: uuid,
-			// Ask for a graceful shutdown but let UpCloud force it once the timeout elapses, so a
-			// wedged guest cannot keep a drained node billable indefinitely.
-			StopType: request.ServerStopTypeSoft,
+			UUID:     uuid,
+			StopType: request.ServerStopTypeHard,
 			Timeout:  stopTimeout,
 		}); err != nil {
 			if sdk.IsNotFound(err) {
