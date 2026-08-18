@@ -51,6 +51,10 @@ const (
 	// "2xCPU-4GB". UpCloud calls these "general purpose".
 	familyGeneral = "general"
 
+	// spotPlanSegment is how UpCloud marks interruptible capacity in a plan name, as in
+	// "GPU-SPOT-8xCPU-64GB-1xL4". There is no API field for it.
+	spotPlanSegment = "-SPOT-"
+
 	// nvidiaGPUResource is the extended resource the NVIDIA device plugin advertises. UpCloud's GPU
 	// plans are NVIDIA-only, so GPU capacity is reported under this name.
 	nvidiaGPUResource corev1.ResourceName = "nvidia.com/gpu"
@@ -132,10 +136,10 @@ func computeRequirements(plan *upcloud.Plan, zones []string) scheduling.Requirem
 		// Node labels consistent, which is what lets Karpenter register the node.
 		scheduling.NewRequirement(corev1.LabelTopologyZone, corev1.NodeSelectorOpIn, zones...),
 		scheduling.NewRequirement(corev1.LabelTopologyRegion, corev1.NodeSelectorOpIn, zones...),
-		// Every UpCloud plan runs on x86-64 Linux, and UpCloud has no spot or preemptible market.
+		// Every UpCloud plan runs on x86-64 Linux.
 		scheduling.NewRequirement(corev1.LabelArchStable, corev1.NodeSelectorOpIn, karpv1.ArchitectureAmd64),
 		scheduling.NewRequirement(corev1.LabelOSStable, corev1.NodeSelectorOpIn, string(corev1.Linux)),
-		scheduling.NewRequirement(karpv1.CapacityTypeLabelKey, corev1.NodeSelectorOpIn, karpv1.CapacityTypeOnDemand),
+		scheduling.NewRequirement(karpv1.CapacityTypeLabelKey, corev1.NodeSelectorOpIn, PlanCapacityType(plan.Name)),
 		// Well known to UpCloud.
 		scheduling.NewRequirement(v1alpha1.LabelInstanceCPU, corev1.NodeSelectorOpIn, fmt.Sprint(plan.CoreNumber)),
 		scheduling.NewRequirement(v1alpha1.LabelInstanceMemory, corev1.NodeSelectorOpIn, fmt.Sprint(plan.MemoryAmount)),
@@ -164,6 +168,22 @@ func PlanFamily(name string) string {
 		return familyGeneral
 	}
 	return strings.ToLower(prefix)
+}
+
+// PlanCapacityType reports whether a plan is spot or on-demand capacity.
+//
+// UpCloud exposes no field for this: spot is encoded as a segment of the plan name, e.g.
+// "GPU-SPOT-8xCPU-64GB-1xL4". The segment is matched rather than a bare substring so that a future
+// plan merely containing the letters "spot" is not misread as interruptible capacity.
+//
+// Spot servers can be reclaimed by UpCloud at any time, and this provider has no interruption
+// handling — the only backstop is the NodeReady RepairPolicy, which tolerates 30 minutes. A NodePool
+// that needs guaranteed capacity should require karpenter.sh/capacity-type: on-demand.
+func PlanCapacityType(name string) string {
+	if strings.Contains(strings.ToUpper(name), spotPlanSegment) {
+		return karpv1.CapacityTypeSpot
+	}
+	return karpv1.CapacityTypeOnDemand
 }
 
 func computeCapacity(

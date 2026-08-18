@@ -245,6 +245,11 @@ type UpCloudNodeClass struct {
 // moved underneath them.
 const UpCloudNodeClassHashVersion = "v1"
 
+// DefaultRootDiskGB is the root disk size used when neither the NodeClass nor the plan says
+// otherwise. It matches the storage_size default in the karpenter_upcloud Terraform module so a
+// node provisioned either way gets the same disk.
+const DefaultRootDiskGB = 50
+
 // Hash generates a hash of the fields of the UpCloudNodeClass that require a node to be replaced
 // when they change. Fields that can be reconciled in place on a running server are excluded.
 func (in *UpCloudNodeClass) Hash() string {
@@ -273,11 +278,21 @@ func (in *UpCloudNodeClass) TemplateID() string {
 	return in.Spec.Storage.Template
 }
 
-// RootDiskSizeGB is the size the root disk will be created with for the given plan. UpCloud plans
-// bundle a storage allowance; spec.storage.size overrides it, and a template larger than either
-// wins because a clone can never shrink below its source.
+// RootDiskSizeGB is the size the root disk will be created with for the given plan.
+//
+// Precedence is spec.storage.size, then the plan's own bundled allowance, then DefaultRootDiskGB;
+// a template larger than the winner raises it again, because a clone can never shrink below its
+// source.
+//
+// The default matters more than it looks: 102 of UpCloud's 174 plans — every CLOUDNATIVE-* and
+// GPU-* — report storage_size 0, meaning the plan bundles no storage rather than that it wants a
+// zero-sized disk. Taking that literally produced a disk sized only by the template floor, roughly
+// 10GB, which is far too small for a node's image cache and ephemeral storage.
 func (in *UpCloudNodeClass) RootDiskSizeGB(planStorageGB int) int {
 	size := planStorageGB
+	if size == 0 {
+		size = DefaultRootDiskGB
+	}
 	if in.Spec.Storage.Size != nil {
 		size = *in.Spec.Storage.Size
 	}

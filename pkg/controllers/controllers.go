@@ -55,7 +55,7 @@ func NewControllers(
 	// operatorpkg's status controller takes the legacy client-go record.EventRecorder, so the
 	// deprecated accessor is the only one whose type fits. Both recorders are used consistently
 	// here rather than mixing event APIs across controllers.
-	recorder := mgr.GetEventRecorderFor("karpenter") //nolint:staticcheck // SA1019: required by github.com/awslabs/operatorpkg/status.NewController.
+	recorder := mgr.GetEventRecorderFor("karpenter")
 	return []controller.Controller{
 		nodeclass.NewController(kubeClient, upcloudClient, opts.ClusterZone, validationCache, opts.DisableDryRun),
 		nodeclasshash.NewController(kubeClient),

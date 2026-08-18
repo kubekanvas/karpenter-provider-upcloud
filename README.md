@@ -17,7 +17,7 @@ equivalent. The choices below are the load-bearing ones — read them before fil
 | Zone | UpCloud **zone** (`fi-hel1`), from `GET /zone` |
 | Region | Also the UpCloud zone — see below |
 | Offering price | `server_plan_<name>` from `GET /price`, converted from credits/hour to EUR/hour |
-| Capacity type | Always `on-demand`; UpCloud has no spot, preemptible or reserved market |
+| Capacity type | `spot` for `*-SPOT-*` plans, otherwise `on-demand`; UpCloud has no reservation market |
 | Instance tags | UpCloud **labels** (not UpCloud "tags", which are a separate account-level API) |
 | Provider ID | `upcloud:////<server-uuid>` |
 
@@ -148,11 +148,21 @@ documented upstream.
 
 ## Limitations
 
-- No spot, reserved or preemptible capacity — UpCloud does not sell any.
+- **Spot capacity has no interruption handling.** UpCloud publishes 30 spot plans, all GPU
+  (`GPU-SPOT-8xCPU-64GB-1xL4`, …), and they are advertised with
+  `karpenter.sh/capacity-type: spot`. UpCloud can reclaim one at any time, and this provider does
+  not watch for that — the only backstop is the `NodeReady` repair policy, which tolerates 30
+  minutes. Use spot for interruptible work only, and require
+  `karpenter.sh/capacity-type: on-demand` on any NodePool that needs guaranteed capacity.
+- No reserved capacity — UpCloud sells none.
 - No `nodeClassRef` selectors for plans; narrow the catalogue with NodePool requirements instead.
 - GPU plans advertise `nvidia.com/gpu`; the device plugin still has to be installed separately.
 - Drift covers the NodeClass hash and the server's zone. A plan being retired by UpCloud is not
   reported as drift.
+- 102 of UpCloud's 174 plans (every `CLOUDNATIVE-*` and `GPU-*`) bundle no storage and report
+  `storage_size: 0`. Those nodes get `spec.storage.size`, or 50GB if it is unset. The
+  `karpenter.k8s.upcloud/instance-storage-size` label reflects the plan's bundled allowance, not the
+  disk actually provisioned.
   
 ## Development
 
@@ -164,6 +174,7 @@ make generate     # regenerate deepcopy funcs and CRDs
 make verify       # regenerate and fail if anything changed
 make image        # build and publish with ko
 make package      # package both charts into dist/
+make test-e2e     # live tests against a real UpCloud account (creates billable servers)
 ```
 
 `make generate` regenerates `zz_generated.deepcopy.go` and the `UpCloudNodeClass` CRD with

@@ -86,6 +86,12 @@ func (p *DefaultProvider) createOfferings(it *cloudprovider.InstanceType, zones 
 		return cached.(cloudprovider.Offerings)
 	}
 
+	// The capacity type is a property of the plan, so it is read back off the instance type rather
+	// than re-derived here — the offering provider is deliberately given no plan struct. This
+	// mirrors how the instance provider recovers the plan's bundled storage size from its
+	// requirements instead of a second catalog lookup.
+	capacityType := it.Requirements.Get(karpv1.CapacityTypeLabelKey).Any()
+
 	offerings := cloudprovider.Offerings{}
 	for _, zone := range zones {
 		// A plan with no price in a zone is not sold there. Skipping it rather than offering it at
@@ -98,9 +104,8 @@ func (p *DefaultProvider) createOfferings(it *cloudprovider.InstanceType, zones 
 			Requirements: scheduling.NewRequirements(
 				scheduling.NewRequirement(corev1.LabelTopologyZone, corev1.NodeSelectorOpIn, zone),
 				scheduling.NewRequirement(corev1.LabelTopologyRegion, corev1.NodeSelectorOpIn, zone),
-				// UpCloud sells capacity one way only: there is no spot or preemptible market and no
-				// reservation API, so every offering is on-demand.
-				scheduling.NewRequirement(karpv1.CapacityTypeLabelKey, corev1.NodeSelectorOpIn, karpv1.CapacityTypeOnDemand),
+				// UpCloud has no reservation API, so an offering is either spot or on-demand.
+				scheduling.NewRequirement(karpv1.CapacityTypeLabelKey, corev1.NodeSelectorOpIn, capacityType),
 			),
 			Price:     price,
 			Available: !p.unavailableOfferings.IsUnavailable(it.Name, zone),

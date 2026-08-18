@@ -35,6 +35,7 @@ import (
 
 	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/apis/v1alpha1"
 	upcloudcache "github.com/kubekanvas/karpenter-provider-upcloud/pkg/cache"
+	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/providers/userdata"
 	sdk "github.com/kubekanvas/karpenter-provider-upcloud/pkg/upcloud"
 	"github.com/kubekanvas/karpenter-provider-upcloud/pkg/utils"
 )
@@ -278,6 +279,21 @@ func (p *DefaultProvider) createRequest(
 		return nil, fmt.Errorf("reading plan storage size for %q, %w", instanceType.Name, err)
 	}
 
+	// The plan and zone are only decided once scheduling has run, so a NodeClass's userData can
+	// refer to them and to the node's labels and taints. Rendering here means a bootstrap script can
+	// register the node already carrying the right instance-type and zone labels, rather than
+	// depending on Karpenter to patch them on afterwards — a patch that k3s's embedded cloud
+	// controller is happy to overwrite.
+	renderedUserData, err := userdata.Render(lo.FromPtr(nodeClass.Spec.UserData), userdata.Options{
+		InstanceType: instanceType.Name,
+		Zone:         zone,
+		NodeLabels:   nodeClaim.Labels,
+		NodeTaints:   append(nodeClaim.Spec.Taints, karpv1.UnregisteredNoExecuteTaint),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("rendering userData for %q, %w", nodeClaim.Name, err)
+	}
+
 	req := &request.CreateServerRequest{
 		Hostname: hostname,
 		Title:    hostname,
@@ -288,7 +304,7 @@ func (p *DefaultProvider) createRequest(
 		// whenever user data is set. Leaving it on unconditionally also lets the node discover its
 		// own UUID, which the cloud-controller-manager needs.
 		Metadata:   upcloud.True,
-		UserData:   lo.FromPtr(nodeClass.Spec.UserData),
+		UserData:   renderedUserData,
 		Networking: networking(nodeClass),
 		StorageDevices: request.CreateServerStorageDeviceSlice{{
 			Action:    "clone",

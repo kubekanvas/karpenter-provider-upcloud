@@ -330,8 +330,13 @@ func (c *CloudProvider) instanceToNodeClaim(inst *instance.Instance, instanceTyp
 	// zone and region on the Node to the same value.
 	labels[corev1.LabelTopologyZone] = inst.Zone
 	labels[corev1.LabelTopologyRegion] = inst.Zone
-	// UpCloud sells no interruptible capacity, so every node is on-demand.
-	labels[karpv1.CapacityTypeLabelKey] = karpv1.CapacityTypeOnDemand
+	// The capacity type comes from the instance type's requirements above whenever the instance type
+	// resolved. It is only derived from the plan name here as a fallback, because a NodeClaim without
+	// this label is unschedulable and the instance type is unresolvable for a server whose NodePool
+	// has been deleted.
+	if _, ok := labels[karpv1.CapacityTypeLabelKey]; !ok {
+		labels[karpv1.CapacityTypeLabelKey] = instancetype.PlanCapacityType(inst.Plan)
+	}
 
 	nodeClaim.Labels = labels
 	nodeClaim.Status.ProviderID = inst.ProviderID()

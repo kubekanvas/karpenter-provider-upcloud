@@ -27,6 +27,13 @@ build: ## Compile the controller
 test: ## Run unit tests
 	go test $(GOFLAGS) -race ./...
 
+.PHONY: test-e2e
+test-e2e: ## Run live e2e tests against a real UpCloud account (creates billable servers)
+	@test -n "$$UPCLOUD_TOKEN$$UPCLOUD_USERNAME" || (echo "UpCloud credentials required; see test/e2e" && exit 1)
+	@test -n "$$UPCLOUD_E2E_ZONE" || (echo "UPCLOUD_E2E_ZONE is required" && exit 1)
+	@test -n "$$UPCLOUD_E2E_TEMPLATE" || (echo "UPCLOUD_E2E_TEMPLATE is required" && exit 1)
+	go test -tags=e2e -count=1 -timeout=30m ./test/e2e/...
+
 .PHONY: coverage
 coverage: ## Run unit tests and write a coverage profile
 	go test $(GOFLAGS) -coverprofile=coverage.out ./...
