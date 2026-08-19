@@ -44,8 +44,17 @@ vet: ## Run go vet
 	go vet ./...
 
 .PHONY: lint
-lint: ## Run golangci-lint
-	golangci-lint run
+lint: ## Run golangci-lint exactly as CI does
+	# The cache is cleared first, and the pinned tool is used rather than whatever golangci-lint is
+	# on PATH. Both matter: a warm cache once reported 0 issues locally while CI failed on a
+	# staticcheck deprecation, because `--fix` had silently stripped the //nolint that suppressed it.
+	go tool -modfile=go.tools.mod golangci-lint cache clean
+	go tool -modfile=go.tools.mod golangci-lint run --timeout=10m
+
+.PHONY: lint-fix
+lint-fix: ## Apply golangci-lint autofixes
+	# Beware: --fix removes //nolint directives it judges unused, so re-run `make lint` afterwards.
+	go tool -modfile=go.tools.mod golangci-lint run --fix --timeout=10m
 
 .PHONY: tidy
 tidy: ## Tidy go.mod
