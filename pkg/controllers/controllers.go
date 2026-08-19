@@ -53,8 +53,10 @@ func NewControllers(
 ) []controller.Controller {
 	opts := options.FromContext(ctx)
 	// operatorpkg's status controller takes the legacy client-go record.EventRecorder, so the
-	// deprecated accessor is the only one whose type fits. Both recorders are used consistently
-	// here rather than mixing event APIs across controllers.
+	// deprecated accessor is the only one whose type fits — GetEventRecorder returns the new
+	// events.EventRecorder. Both controllers below share this one recorder rather than mixing event
+	// APIs. The staticcheck SA1019 exclusion for this line lives in .golangci.yaml, because an
+	// inline //nolint does not survive `golangci-lint run --fix`.
 	recorder := mgr.GetEventRecorderFor("karpenter")
 	return []controller.Controller{
 		nodeclass.NewController(kubeClient, upcloudClient, opts.ClusterZone, validationCache, opts.DisableDryRun),

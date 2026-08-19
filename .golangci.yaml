@@ -117,6 +117,17 @@ linters:
         path: zz_(.+)\.go
       - path: (.+)\.go$
         text: declaration of "(err|ctx)" shadows declaration at
+      # operatorpkg's status.NewController takes the legacy client-go record.EventRecorder.
+      # controller-runtime exposes that type only through the deprecated GetEventRecorderFor;
+      # GetEventRecorder returns the new events.EventRecorder, which does not typecheck against it.
+      # Until operatorpkg adopts the new events API there is no non-deprecated way to build this.
+      #
+      # The exclusion lives here rather than as an inline //nolint because `golangci-lint run --fix`
+      # strips the directive as unused, which silently reintroduces this failure in CI.
+      - linters:
+          - staticcheck
+        path: pkg/controllers/controllers\.go
+        text: "SA1019: mgr.GetEventRecorderFor is deprecated"
     paths:
       - hack
       - charts
